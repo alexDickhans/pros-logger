@@ -4,6 +4,8 @@
 #include "pros/rtos.hpp"
 #include "pros/misc.h"
 
+#define Log(msg)   logger->log(std::string(__PRETTY_FUNCTION__) + ":" + std::to_string(__LINE__), msg)
+
 namespace Pronounce {
 
 #define INDEX_FILE "/usd/index.bin"
