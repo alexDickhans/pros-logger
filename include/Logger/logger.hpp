@@ -2,6 +2,7 @@
 
 #include <string>
 #include "pros/rtos.hpp"
+#include "pros/misc.h"
 
 namespace Pronounce {
 
@@ -19,11 +20,15 @@ namespace Pronounce {
 
 		FILE* logFile;
 
+		bool installed = false;
+
 	protected:
 		Logger();
 		~Logger() = default;
 
 		void update();
+
+		void newFile();
 
 		void writeLog(const std::string& write) {
 			buffer.append(write);
