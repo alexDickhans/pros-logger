@@ -34,18 +34,34 @@ namespace Pronounce {
 	}
 
 	void Logger::update() {
-		uint32_t t = pros::micros();
+
+		std::cout << buffer.size() << std::endl;
 
 		if (pros::c::usd_is_installed() && !installed) {
 			newFile();
 			installed = true;
+			if (buffer.size() > 1E6) {
+				buffer = "";
+			}
+			return;
 		} else if (installed && !pros::c::usd_is_installed()){
 			installed = false;
+			if (buffer.size() > 1E6) {
+				buffer = "";
+			}
+			return;
+		} else if (installed) {
+			if (buffer.size() > 1E6) {
+				buffer = "";
+			}
 		}
 
 		logFile = fopen(fileName.c_str(), "a");
 
 		if (logFile == nullptr) {
+			if (buffer.size() > 1E6) {
+				buffer = "";
+			}
 			return;
 		}
 

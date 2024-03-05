@@ -78,7 +78,7 @@ void opcontrol() {
 	pros::Motor left_mtr(1);
 	pros::Motor right_mtr(2);
 
-	Pronounce::Logger* logger = Pronounce::Logger::getInstance();
+	Pronounce::Logger *logger = Pronounce::Logger::getInstance();
 
 	while (true) {
 		pros::lcd::print(0, "%s %d %d", logger->getFileName(),
@@ -89,6 +89,9 @@ void opcontrol() {
 
 		left_mtr = left;
 		right_mtr = right;
+
+		for (int i = 0; i < 500; i++)
+			logger->log("stuff", std::to_string(500));
 
 		pros::delay(20);
 	}
