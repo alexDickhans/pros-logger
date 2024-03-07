@@ -9,33 +9,13 @@
 namespace Pronounce {
 
 	Logger* Logger::pinstance_{nullptr};
-	pros::Mutex Logger::mutex_;
-
-	Logger::Logger() {
-		if (pros::c::usd_is_installed()) {
-			newFile();
-			installed = true;
-		}
-
-		task_ = std::make_shared<pros::Task>([=]() -> void {
-			while (true) {
-				pros::Task::delay(50);
-				this->update();
-			}
-		});
-	}
-
-	Logger *Logger::getInstance() {
-		std::lock_guard<pros::Mutex> lock(mutex_);
-		if (pinstance_ == nullptr) {
-			pinstance_ = new Logger();
-		}
-		return pinstance_;
-	}
+	pros::Task Logger::task{[]() -> void {pros::Task::delay(50); Logger::update();}};
+	bool Logger::installed{false};
+	uint32_t Logger::currentIndex;
+	std::string Logger::fileName;
+	std::string Logger::buffer;
 
 	void Logger::update() {
-
-		std::cout << buffer.size() << std::endl;
 
 		if (pros::c::usd_is_installed() && !installed) {
 			newFile();
@@ -56,7 +36,7 @@ namespace Pronounce {
 			}
 		}
 
-		logFile = fopen(fileName.c_str(), "a");
+		FILE* logFile = fopen(fileName.c_str(), "a");
 
 		if (logFile == nullptr) {
 			if (buffer.size() > 1E6) {
@@ -72,15 +52,7 @@ namespace Pronounce {
 	}
 
 	void Logger::log(const std::string &className, const std::string &logData) {
-		this->writeLog(className + " " + std::to_string(pros::millis()) + ": " + logData + "\n");
-	}
-
-	const std::string &Logger::getFileName() const {
-		return fileName;
-	}
-
-	uint32_t Logger::getCurrentIndex() const {
-		return currentIndex;
+		Logger::writeLog(className + " " + std::to_string(pros::millis()) + ": " + logData + "\n");
 	}
 
 	void Logger::newFile() {
@@ -97,7 +69,7 @@ namespace Pronounce {
 
 		currentIndex++;
 
-		this->currentIndex = currentIndex;
+		Logger::currentIndex = currentIndex;
 
 		indexFile = fopen(INDEX_FILE, "wb");
 
@@ -107,5 +79,18 @@ namespace Pronounce {
 
 		fileName = "/usd/" + std::to_string(currentIndex) + ".log";
 
+	}
+
+	uint32_t Logger::getCurrentIndex() {
+		return currentIndex;
+	}
+
+	const std::string &Logger::getFileName() {
+		return fileName;
+	}
+
+	void Logger::writeLog(const std::string &write) {
+		buffer.append(write);
+		std::cout << write;
 	}
 } // Pronounce
